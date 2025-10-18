@@ -1,7 +1,9 @@
 import flatpickr from 'flatpickr';
+import iziToast from 'izitoast';
 
 let userSelectedDate = null;
 let userSelectedSeconds = null;
+let secondsNow;
 let timerId = null;
 
 const options = {
@@ -14,9 +16,17 @@ const options = {
     userSelectedDate = selectedDates[0] || null;
     const now = options.defaultDate;
     userSelectedSeconds = Math.floor(userSelectedDate.getTime() / 1000);
-    userSelectedSeconds -= Math.floor(now.getTime() / 1000);
+    secondsNow -= Math.floor(now.getTime() / 1000);
+
     if (!userSelectedDate || userSelectedDate.getTime() <= now) {
-      window.alert('Please choose a date in the future');
+      // window.alert('Please choose a date in the future');
+      iziToast.show({
+        title: 'Hey',
+        message: 'Please choose a date in the future',
+        color: 'red',
+        position: 'topRight',
+        progressBarColor: 'darkred',
+      });
       startBtn.disabled = true;
     } else {
       startBtn.disabled = false;
@@ -26,8 +36,9 @@ const options = {
     userSelectedDate = selectedDates[0] || null;
     const now = options.defaultDate;
     userSelectedSeconds = Math.floor(userSelectedDate.getTime() / 1000);
-    userSelectedSeconds -= Math.floor(now.getTime() / 1000);
-    if (selectedDates[0] < now) {
+    secondsNow -= Math.floor(now.getTime() / 1000);
+
+    if (selectedDates[0] <= now) {
       return (startBtn.disabled = true);
     } else if (selectedDates[0] > now) {
       return (startBtn.disabled = false);
@@ -61,10 +72,7 @@ function updateTimer() {
   const { days, hours, minutes, seconds } = convertMs(diff);
   console.log({ days, hours, minutes, seconds });
 
-  dataDaysEl.textContent = days;
-  dataHoursEl.textContent = hours;
-  dataMinutsEl.textContent = minutes;
-  dataSecondEl.textContent = seconds;
+  addLeadingZero({ days, hours, minutes, seconds });
 }
 
 function convertMs(ms) {
@@ -82,3 +90,9 @@ function convertMs(ms) {
 }
 
 // clearInterval(intervalId);
+function addLeadingZero(value) {
+  dataDaysEl.textContent = String(value.days).padStart(2, '0');
+  dataHoursEl.textContent = String(value.hours).padStart(2, '0');
+  dataMinutsEl.textContent = String(value.minutes).padStart(2, '0');
+  dataSecondEl.textContent = String(value.seconds).padStart(2, '0');
+}
