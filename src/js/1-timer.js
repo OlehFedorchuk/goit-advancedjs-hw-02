@@ -6,12 +6,10 @@ const dataDaysEl = document.querySelector('[data-days]');
 const dataHoursEl = document.querySelector('[data-hours]');
 const dataMinutsEl = document.querySelector('[data-minutes]');
 const dataSecondEl = document.querySelector('[data-seconds]');
+const inputEl = document.querySelector('#datetime-picker');
 
 startBtn.disabled = true;
-
 let userSelectedDate = null;
-let userSelectedSeconds = null;
-let secondsNow;
 let timerId = null;
 
 const options = {
@@ -22,18 +20,8 @@ const options = {
 
   onClose(selectedDates) {
     userSelectedDate = selectedDates[0] || null;
-    const now = options.defaultDate;
-    userSelectedSeconds = Math.floor(userSelectedDate.getTime() / 1000);
-    secondsNow -= Math.floor(now.getTime() / 1000);
-
-    if (!userSelectedDate || userSelectedDate.getTime() <= now) {
-      iziToast.show({
-        title: 'Hey',
-        message: 'Please choose a date in the future',
-        color: 'red',
-        position: 'topRight',
-        progressBarColor: 'darkred',
-      });
+    const now = new Date();
+    if (userSelectedDate.getTime() <= now) {
       startBtn.disabled = true;
     } else {
       startBtn.disabled = false;
@@ -41,11 +29,15 @@ const options = {
   },
   onChange(selectedDates) {
     userSelectedDate = selectedDates[0] || null;
-    const now = options.defaultDate;
-    userSelectedSeconds = Math.floor(userSelectedDate.getTime() / 1000);
-    secondsNow -= Math.floor(now.getTime() / 1000);
-
+    const now = new Date();
     if (selectedDates[0] <= now) {
+      iziToast.show({
+        title: 'Hey',
+        message: 'Please choose a date in the future',
+        color: 'green',
+        position: 'topRight',
+        progressBarColor: 'darkred',
+      });
       return (startBtn.disabled = true);
     } else if (selectedDates[0] > now) {
       return (startBtn.disabled = false);
@@ -56,8 +48,10 @@ const options = {
 flatpickr('#datetime-picker', options);
 
 startBtn.addEventListener('click', () => {
-  console.log('Start!');
+  // console.log('Start!');
   updateTimer();
+  startBtn.disabled = true;
+  inputEl.disabled = true;
   timerId = setInterval(updateTimer, 1000);
 });
 
@@ -67,7 +61,9 @@ function updateTimer() {
 
   if (diff <= 0) {
     clearInterval(timerId);
-    console.log('Time is up!');
+    startBtn.disabled = false;
+    inputEl.disabled = false;
+    // console.log('Time is up!');
     return;
   }
   const { days, hours, minutes, seconds } = convertMs(diff);
